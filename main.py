@@ -1,11 +1,33 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from Data_Base_SQL.database import Base, engine, get_db
+from Data_Base_SQL import crud, schemas, models
+from sqlalchemy.orm import Session
 
-app= FastAPI(titele="Now Api for Gym")
+# Create DB tables
+models.Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
 
 
-list={"name":"biceps","repetition":3}
+@app.post("/users")
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    return crud.create_user(db, user)
 
-@app.get("/catalog")
-def catalog():
-    return list
 
+@app.get("/users")
+def list_users(db: Session = Depends(get_db)):
+    return crud.get_users(db)
+
+
+@app.post("/exercises")
+def create_exercise(exercise: schemas.ExerciseCreate, db: Session = Depends(get_db)):
+    return crud.create_exercise(db, exercise)
+
+
+@app.get("/exercises")
+def list_exercises(db: Session = Depends(get_db)):
+    return crud.get_exercises(db)
+
+@app.get("/")
+def home():
+    return {"message": "Gym API is running!"}

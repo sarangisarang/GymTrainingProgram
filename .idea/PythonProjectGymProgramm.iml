@@ -4,7 +4,7 @@
     <content url="file://$MODULE_DIR$/../PythonProjectGymProgramm">
       <excludeFolder url="file://$MODULE_DIR$/../PythonProjectGymProgramm/.venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 (pythonProject2)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.14 (Gym_Trening_Programm)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

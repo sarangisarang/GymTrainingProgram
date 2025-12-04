@@ -1,11 +1,19 @@
 from fastapi import FastAPI
+from Data_Base_SQL.database import engine
+from Data_Base_SQL import models
+from FastAPI_Funcions import users, exercises, workout
 
-app= FastAPI(titele="Now Api for Gym")
+
+models.Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
+
+# Register routers
+app.include_router(users.app)
+app.include_router(exercises.app)
+app.include_router(workout.app)
 
 
-list={"name":"biceps","repetition":3}
-
-@app.get("/catalog")
-def catalog():
-    return list
-
+@app.get("/")
+def home():
+    return {"message": "Gym API is running!"}

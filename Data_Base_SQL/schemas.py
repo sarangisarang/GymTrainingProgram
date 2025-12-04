@@ -27,7 +27,12 @@ class ExerciseCreate(ExerciseBase):
     pass
 
 
-class ExerciseRead(ExerciseBase):
+class ExerciseRead(BaseModel):
     id: int
+    title: str
+    muscle_group: str
+    user_id: int | None
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        orm_mode = True
+

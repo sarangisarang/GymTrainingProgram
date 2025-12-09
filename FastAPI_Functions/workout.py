@@ -12,7 +12,7 @@ router = APIRouter(
 
 
 # -----------------------------
-# WORKOUT ERSTELLEN
+# WORKOUT ERSTELLEN (CREATE)
 # -----------------------------
 @router.post("/", response_model=schemas.WorkoutRead, status_code=status.HTTP_201_CREATED)
 def create_workout(workout: schemas.WorkoutCreate, db: Session = Depends(get_db)):
@@ -33,7 +33,7 @@ def create_workout(workout: schemas.WorkoutCreate, db: Session = Depends(get_db)
 
 
 # -----------------------------
-# ALLE WORKOUTS ANZEIGEN
+# ALLE WORKOUTS ANZEIGEN (READ)
 # -----------------------------
 @router.get("/", response_model=List[schemas.WorkoutRead])
 def read_workouts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
@@ -52,7 +52,7 @@ def read_workouts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 
 # -----------------------------
-# EINZELNES WORKOUT ANZEIGEN
+# EINZELNES WORKOUT ANZEIGEN (READ)
 # -----------------------------
 @router.get("/{workout_id}", response_model=schemas.WorkoutRead)
 def read_workout(workout_id: int, db: Session = Depends(get_db)):
@@ -71,7 +71,7 @@ def read_workout(workout_id: int, db: Session = Depends(get_db)):
 
 
 # -----------------------------
-# WORKOUTS EINES BENUTZERS ANZEIGEN
+# WORKOUTS EINES BENUTZERS ANZEIGEN (READ)
 # -----------------------------
 @router.get("/user/{user_id}", response_model=List[schemas.WorkoutRead])
 def get_user_workouts(user_id: int, db: Session = Depends(get_db)):
@@ -87,3 +87,53 @@ def get_user_workouts(user_id: int, db: Session = Depends(get_db)):
 
     # Gib die Workouts des Benutzers zurück
     return db_user.workouts
+
+
+# -----------------------------
+# WORKOUT AKTUALISIEREN (UPDATE)
+# -----------------------------
+@router.put("/{workout_id}", response_model=schemas.WorkoutRead)
+def update_workout(
+        workout_id: int,
+        workout: schemas.WorkoutCreate,
+        db: Session = Depends(get_db)
+):
+    """
+    Aktualisiert ein bestehendes Workout.
+    """
+    db_workout = crud.get_workout_by_id(db, workout_id)
+    if not db_workout:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Workout nicht gefunden"
+        )
+
+    # Prüfe, ob der neue Benutzer existiert (falls user_id geändert wird)
+    db_user = crud.get_user_by_id(db, user_id=workout.user_id)
+    if db_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Benutzer mit ID {workout.user_id} wurde nicht gefunden"
+        )
+
+    updated_workout = crud.update_workout(db, workout_id, workout)
+    return updated_workout
+
+
+# -----------------------------
+# WORKOUT LÖSCHEN (DELETE)
+# -----------------------------
+@router.delete("/{workout_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_workout(workout_id: int, db: Session = Depends(get_db)):
+    """
+    Löscht ein Workout aus der Datenbank.
+    """
+    db_workout = crud.get_workout_by_id(db, workout_id)
+    if not db_workout:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Workout nicht gefunden"
+        )
+
+    crud.delete_workout(db, workout_id)
+    return {"message": "Workout wurde erfolgreich gelöscht"}

@@ -14,10 +14,11 @@ app = FastAPI(
 )
 
 # Registriert alle Router (Endpoints) für die API
-app.include_router(users.router, prefix="/users", tags=["Users"])
-app.include_router(exercises.router, prefix="/exercises", tags=["Exercises"])
-app.include_router(workout.router, prefix="/workouts", tags=["Workouts"])
-app.include_router(workout_exercises.router, prefix="/workout-exercises", tags=["Workout Exercises"])
+# Prefix wird NICHT hier hinzugefügt, weil es bereits in den Router-Dateien definiert ist!
+app.include_router(users.router)
+app.include_router(exercises.router)
+app.include_router(workout.router)
+app.include_router(workout_exercises.router)
 
 
 @app.get("/", tags=["Root"])

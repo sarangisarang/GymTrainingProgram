@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="Black">
-    <option name="sdkName" value="Python 3.12 (PythonProject1)" />
-  </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.14 (Gym_Trening_Programm)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.14 virtualenv at C:\Users\ozgun\PycharmProjects\Gym_Training_Programm\.venv" project-jdk-type="Python SDK" />
 </project>

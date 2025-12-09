@@ -1,31 +1,46 @@
 from fastapi import FastAPI
-from Data_Base_SQL.database import engine
+from Data_Base_SQL.database import engine, Base
 from Data_Base_SQL import models
-<<<<<<< HEAD
 from FastAPI_Functions import users, exercises, workout, workout_exercises
-=======
-from FastAPI_Functions import users, exercises, workout
 
->>>>>>> 0be12a57868a06cd9b7e823ed7fd36984d314e81
-
+# Erstellt alle Datenbanktabellen basierend auf den Models
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+# Initialisiert die FastAPI-App
+app = FastAPI(
+    title="TEAM3 Gym API",
+    description="API für Gym-Management mit Users, Exercises und Workouts",
+    version="1.0.0"
+)
 
-<<<<<<< HEAD
-# Inkludiert die Router-Objekte aus den Funktionsmodulen.
-app.include_router(users.router)
-app.include_router(exercises.router) 
-app.include_router(workout.router)
-app.include_router(workout_exercises.router)
-=======
-# Register routers
-app.include_router(users.app)
-app.include_router(exercises.app)
-app.include_router(workout.app)
+# Registriert alle Router (Endpoints) für die API
+app.include_router(users.router, prefix="/users", tags=["Users"])
+app.include_router(exercises.router, prefix="/exercises", tags=["Exercises"])
+app.include_router(workout.router, prefix="/workouts", tags=["Workouts"])
+app.include_router(workout_exercises.router, prefix="/workout-exercises", tags=["Workout Exercises"])
 
->>>>>>> 0be12a57868a06cd9b7e823ed7fd36984d314e81
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 def home():
-    return {"message": "TEAM3 - Gym API is running!"}
+    """
+    Root-Endpoint: Bestätigt, dass die API läuft.
+    """
+    return {
+        "message": "TEAM3 - Gym API is running! 🏋️",
+        "version": "1.0.0",
+        "endpoints": {
+            "users": "/users",
+            "exercises": "/exercises",
+            "workouts": "/workouts",
+            "workout_exercises": "/workout-exercises",
+            "docs": "/docs"
+        }
+    }
+
+
+@app.get("/health", tags=["Health"])
+def health_check():
+    """
+    Health-Check Endpoint für Monitoring.
+    """
+    return {"status": "healthy", "database": "connected"}

@@ -2,53 +2,35 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-<<<<<<< HEAD
+# SQLite Datenbank URL (lokale Datei)
 SQLALCHEMY_DATABASE_URL = "sqlite:///./gym.db"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-# Dependency
-=======
-# ---------------------------------------------------------
-# Datenbankkonfiguration (SQLite)
-# ---------------------------------------------------------
-
-# SQLite-Verbindungs-URL (lokale Datei: gym.db)
-SQLALCHEMY_DATABASE_URL = "sqlite:///./gym.db"
-
-# Erstellen der Engine
-# Für SQLite muss 'check_same_thread' deaktiviert werden,
-# da mehrere Threads gleichzeitig auf dieselbe Verbindung zugreifen können.
+# Engine erstellen
+# check_same_thread=False ist nötig für SQLite mit FastAPI
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
 
-# Erstellen einer SessionFactory:
-# autocommit=False  → Änderungen werden erst nach commit() gespeichert
-# autoflush=False   → verhindert automatisches Zwischenspeichern
+# Session erstellen
+# autocommit=False bedeutet: ich muss selber commit() aufrufen
+# autoflush=False bedeutet: keine automatische Synchronisation
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Basisklasse für alle ORM-Modelle
+# Basis-Klasse für alle Modelle
 Base = declarative_base()
 
 
-# ---------------------------------------------------------
-# Abhängigkeitsfunktion für FastAPI
-# ---------------------------------------------------------
->>>>>>> 0be12a57868a06cd9b7e823ed7fd36984d314e81
+# Dependency für FastAPI
 def get_db():
     """
-    Liefert eine neue Datenbank-Session zurück.
-    Diese Funktion wird als Dependency in FastAPI-Routen genutzt.
-    Nach jeder Anfrage wird die Session automatisch geschlossen.
+    Diese Funktion gibt eine Datenbank-Session zurück.
+    Sie wird in FastAPI mit Depends() benutzt.
+    Die Session wird am Ende automatisch geschlossen.
 
     Beispiel:
-        def endpoint(db: Session = Depends(get_db)):
-            ...
+        def meine_route(db: Session = Depends(get_db)):
+            # hier kann ich mit db arbeiten
+            pass
     """
     db = SessionLocal()
     try:

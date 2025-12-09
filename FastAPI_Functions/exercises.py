@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
+from uuid import UUID
 from sqlalchemy.orm import Session
 from Data_Base_SQL.database import get_db
 from Data_Base_SQL import crud, schemas
 
-# Erstellt einen API-Router für alle Endpunkte im Zusammenhang mit Übungen
 app = APIRouter(prefix="/exercises", tags=["Übungen"])
 
 
@@ -12,10 +12,6 @@ app = APIRouter(prefix="/exercises", tags=["Übungen"])
 # -----------------------------
 @app.post("/", response_model=schemas.ExerciseRead)
 def create_exercise(exercise: schemas.ExerciseCreate, db: Session = Depends(get_db)):
-    """
-    Erstellt eine neue Übung in der Datenbank, die keinem Benutzer zugeordnet ist.
-    Überprüft, ob eine Übung mit demselben Titel und derselben Muskelgruppe bereits existiert.
-    """
     existing = crud.get_exercises(db)
 
     for ex in existing:
@@ -30,10 +26,6 @@ def create_exercise(exercise: schemas.ExerciseCreate, db: Session = Depends(get_
 # -----------------------------
 @app.get("/", response_model=list[schemas.ExerciseRead])
 def list_exercises(db: Session = Depends(get_db)):
-    """
-    Gibt eine Liste aller in der Datenbank vorhandenen Übungen zurück.
-    Wenn keine Übungen vorhanden sind, wird ein Fehler 404 ausgelöst.
-    """
     exercises = crud.get_exercises(db)
 
     if not exercises:
@@ -46,11 +38,11 @@ def list_exercises(db: Session = Depends(get_db)):
 # ÜBUNG FÜR EINEN BESTIMMTEN BENUTZER ERSTELLEN
 # -----------------------------
 @app.post("/user/{user_id}", response_model=schemas.ExerciseRead)
-def create_user_exercise(user_id: int, exercise: schemas.ExerciseCreate, db: Session = Depends(get_db)):
-    """
-    Erstellt eine neue Übung und ordnet sie einem bestimmten Benutzer zu.
-    Überprüft zunächst, ob der Benutzer existiert.
-    """
+def create_user_exercise(
+    user_id: UUID,
+    exercise: schemas.ExerciseCreate,
+    db: Session = Depends(get_db)
+):
     user = crud.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
@@ -62,11 +54,7 @@ def create_user_exercise(user_id: int, exercise: schemas.ExerciseCreate, db: Ses
 # ÜBUNGEN EINES BESTIMMTEN BENUTZERS ANZEIGEN
 # -----------------------------
 @app.get("/user/{user_id}", response_model=list[schemas.ExerciseRead])
-def get_user_exercises(user_id: int, db: Session = Depends(get_db)):
-    """
-    Gibt alle Übungen zurück, die einem bestimmten Benutzer gehören.
-    Löst einen Fehler aus, wenn der Benutzer nicht existiert.
-    """
+def get_user_exercises(user_id: UUID, db: Session = Depends(get_db)):
     user = crud.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
@@ -78,11 +66,7 @@ def get_user_exercises(user_id: int, db: Session = Depends(get_db)):
 # ÜBUNG LÖSCHEN
 # -----------------------------
 @app.delete("/{exercise_id}")
-def delete_exercise(exercise_id: int, db: Session = Depends(get_db)):
-    """
-    Löscht eine Übung aus der Datenbank anhand ihrer ID.
-    Wenn die Übung nicht existiert, wird ein 404-Fehler ausgelöst.
-    """
+def delete_exercise(exercise_id: UUID, db: Session = Depends(get_db)):
     db_ex = crud.get_exercise_by_id(db, exercise_id)
     if not db_ex:
         raise HTTPException(status_code=404, detail="Übung nicht gefunden")
@@ -96,15 +80,10 @@ def delete_exercise(exercise_id: int, db: Session = Depends(get_db)):
 # -----------------------------
 @app.put("/{exercise_id}", response_model=schemas.ExerciseRead)
 def update_exercise(
-    exercise_id: int,
+    exercise_id: UUID,
     exercise: schemas.ExerciseCreate,
     db: Session = Depends(get_db)
 ):
-    """
-    Aktualisiert die Daten einer bestehenden Übung (Titel und Muskelgruppe).
-    Gibt die aktualisierte Übung zurück.
-    Wenn keine Übung mit der angegebenen ID existiert, wird ein 404-Fehler ausgelöst.
-    """
     db_ex = crud.get_exercise_by_id(db, exercise_id)
     if not db_ex:
         raise HTTPException(status_code=404, detail="Übung nicht gefunden")

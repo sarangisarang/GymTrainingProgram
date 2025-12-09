@@ -1,20 +1,23 @@
+from typing import Optional
 from pydantic import BaseModel, ConfigDict
-
+from datetime import datetime, date
+from uuid import UUID
 
 # ---------------- USER ----------------
 class UserBase(BaseModel):
     name: str
     email: str
 
-
 class UserCreate(UserBase):
     pass
 
-
 class UserRead(UserBase):
-    id: int
+    id: UUID
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
 
 
 # ---------------- EXERCISE ----------------
@@ -22,17 +25,39 @@ class ExerciseBase(BaseModel):
     title: str
     muscle_group: str
 
-
 class ExerciseCreate(ExerciseBase):
     pass
 
-
 class ExerciseRead(BaseModel):
-    id: int
+    id: UUID
     title: str
     muscle_group: str
-    user_id: int | None
+    user_id: UUID | None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )
 
+
+# ---------------- WORKOUT ----------------
+class WorkoutCreate(BaseModel):
+    user_id: UUID
+    date: date
+    notes: Optional[str]
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True
+    )
+
+class WorkoutRead(BaseModel):
+    id: UUID
+    user_id: UUID
+    date: datetime
+    notes: Optional[str]
+    created_at: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        arbitrary_types_allowed=True
+    )

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
+from uuid import UUID
 from sqlalchemy.orm import Session
 from Data_Base_SQL.database import get_db
 from Data_Base_SQL import crud, schemas
 
-# Erstellt einen API-Router für alle Endpunkte, die mit Benutzern verknüpft sind
 app = APIRouter(prefix="/users", tags=["Benutzer"])
 
 
@@ -12,13 +12,9 @@ app = APIRouter(prefix="/users", tags=["Benutzer"])
 # -----------------------------
 @app.post("/", response_model=schemas.UserRead)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    """
-    Erstellt einen neuen Benutzer in der Datenbank.
-    Überprüft optional, ob die angegebene E-Mail-Adresse bereits existiert,
-    um doppelte Benutzer zu vermeiden.
-    """
-    existing = crud.get_users(db)
-    for u in existing:
+    existing_users = crud.get_users(db)
+
+    for u in existing_users:
         if u.email == user.email:
             raise HTTPException(status_code=400, detail="E-Mail existiert bereits")
 
@@ -30,10 +26,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 # -----------------------------
 @app.get("/", response_model=list[schemas.UserRead])
 def list_users(db: Session = Depends(get_db)):
-    """
-    Gibt eine Liste aller registrierten Benutzer zurück.
-    Falls keine Benutzer vorhanden sind, wird ein Fehler 404 ausgelöst.
-    """
     users = crud.get_users(db)
 
     if not users:
@@ -43,14 +35,10 @@ def list_users(db: Session = Depends(get_db)):
 
 
 # -----------------------------
-# BENUTZER NACH ID ABRUFEN
+# BENUTZER NACH ID ABRUFEN (UUID!)
 # -----------------------------
 @app.get("/{user_id}", response_model=schemas.UserRead)
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    """
-    Ruft einen einzelnen Benutzer anhand seiner ID ab.
-    Wenn der Benutzer nicht existiert, wird ein Fehler 404 ausgelöst.
-    """
+def get_user(user_id: UUID, db: Session = Depends(get_db)):
     user = crud.get_user_by_id(db, user_id)
 
     if not user:

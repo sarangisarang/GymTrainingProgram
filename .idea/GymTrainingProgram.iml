@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$/../PythonProjectGymProgramm">
-      <excludeFolder url="file://$MODULE_DIR$/../PythonProjectGymProgramm/.venv" />
+    <content url="file://$MODULE_DIR$/../GymTrainingProgram">
+      <excludeFolder url="file://$MODULE_DIR$/../GymTrainingProgram/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.11 (pythonProject2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

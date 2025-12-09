@@ -8,10 +8,10 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Register routers
-app.include_router(users.app)
-app.include_router(exercises.app)
-app.include_router(workout.app)
+# Inkludiert die Router-Objekte aus den Funktionsmodulen.
+app.include_router(users.router)
+app.include_router(exercises.router)
+app.include_router(workout.router)
 
 
 @app.get("/")

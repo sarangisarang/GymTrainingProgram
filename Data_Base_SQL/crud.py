@@ -58,3 +58,11 @@ def get_exercise_by_id(db: Session, exercise_id: int):
     Return a single exercise by ID.
     """
     return db.query(models.Exercise).filter(models.Exercise.id == exercise_id).first()
+
+def create_workout(db: Session, workout: schemas_workouts.WorkoutCreate):
+    # Erstellt ein neues Workout in der Datenbank
+    db_workout = models_workouts.Workout(**workout.dict())
+    db.add(db_workout) # Fügt es zur Session hinzu
+    db.commit() # Speichert es in der Datenbank
+    db.refresh(db_workout) # Holt die DB-Daten (inkl. ID) zurück
+    return db_workout

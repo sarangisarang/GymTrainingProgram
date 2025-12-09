@@ -1,58 +1,39 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from Data_Base_SQL.database import get_db
-from Data_Base_SQL import crud, schemas
-
-app = APIRouter(prefix="/exercises", tags=["Exercises"])
+from Data_Base_SQL import crud, schemas, database
 
 
-# -----------------------------
-# CREATE EXERCISE (without user)
-# -----------------------------
-@app.post("/", response_model=schemas.ExerciseRead)
+# Definiert und exportiert das 'router'-Objekt, das in main.py benötigt wird
+router = APIRouter(
+    prefix="/exercises",
+    tags=["Exercises"]
+)
+
+
+# Dependency, um die Datenbank-Session zu erhalten (Wiederverwendung der Funktion aus database.py)
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@router.post("/", response_model=schemas.ExerciseRead, status_code=status.HTTP_201_CREATED)
 def create_exercise(exercise: schemas.ExerciseCreate, db: Session = Depends(get_db)):
-    existing = crud.get_exercises(db)
+    # Annahme: 'create_exercise' Funktion ist in crud.py definiert
+    return crud.create_exercise(db=db, exercise=exercise)
 
-    for ex in existing:
-        if ex.title.lower() == exercise.title.lower() and ex.muscle_group.lower() == exercise.muscle_group.lower():
-            raise HTTPException(status_code=400, detail="This exercise already exists")
-
-    return crud.create_exercise(db, exercise)
-
-
-# -----------------------------
-# LIST ALL EXERCISES
-# -----------------------------
-@app.get("/", response_model=list[schemas.ExerciseRead])
-def list_exercises(db: Session = Depends(get_db)):
-    exercises = crud.get_exercises(db)
-
-    if not exercises:
-        raise HTTPException(status_code=404, detail="No exercises found")
-
+@router.get("/", response_model=list[schemas.ExerciseRead])
+def read_exercises(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Annahme: 'get_exercises' Funktion ist in crud.py definiert
+    exercises = crud.get_exercises(db, skip=skip, limit=limit)
     return exercises
 
-
-
-# -----------------------------
-# CREATE EXERCISE FOR SPECIFIC USER
-# -----------------------------
-@app.post("/user/{user_id}", response_model=schemas.ExerciseRead)
-def create_user_exercise(user_id: int, exercise: schemas.ExerciseCreate, db: Session = Depends(get_db)):
-    user = crud.get_user_by_id(db, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return crud.create_exercise_for_user(db, user_id, exercise)
-
-
-# -----------------------------
-# GET EXERCISES BELONGING TO A USER
-# -----------------------------
-@app.get("/user/{user_id}", response_model=list[schemas.ExerciseRead])
-def get_user_exercises(user_id: int, db: Session = Depends(get_db)):
-    user = crud.get_user_by_id(db, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return crud.get_exercises_by_user(db, user_id)
+@router.get("/{exercise_id}", response_model=schemas.ExerciseRead)
+def read_exercise(exercise_id: int, db: Session = Depends(get_db)):
+    # Annahme: 'get_exercise' Funktion ist in crud.py definiert
+    db_exercise = crud.get_exercise(db, exercise_id=exercise_id)
+    if db_exercise is None:
+        raise HTTPException(status_code=404, detail="Exercise not found")
+    return db_exercise
